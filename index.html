@@ -1,0 +1,2870 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交互式个人简历 - 刘青鑫</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css">
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(-45deg, #0a192f, #0c2b4b, #112d4e, #1a3a5f);
+            background-size: 400% 400%;
+            color: #e6f1ff;
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            animation: gradientShift 20s ease infinite;
+            cursor: default;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 交互式背景元素 */
+        .interactive-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* 粒子容器 */
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        /* 浮动几何形状 - 分布在整个页面 */
+        .floating-shape {
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(64, 156, 255, 0.1);
+            border: 1px solid rgba(64, 156, 255, 0.2);
+            pointer-events: none;
+            z-index: -1;
+            animation: float 20s infinite linear;
+        }
+
+        .floating-shape.square {
+            border-radius: 5px;
+        }
+
+        .floating-shape.triangle {
+            width: 0;
+            height: 0;
+            border-radius: 0;
+            background: transparent;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-bottom: 43px solid rgba(64, 156, 255, 0.15);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+            100% { transform: translateY(0) rotate(360deg); }
+        }
+
+        /* 鼠标点击效果 - 全页面 */
+        .click-effect {
+            position: fixed;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(64, 156, 255, 0.4) 0%, rgba(64, 156, 255, 0) 70%);
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 鼠标轨迹效果 - 全页面 */
+        .mouse-trail {
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(64, 156, 255, 0.15);
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 连接线效果 - 全页面 */
+        .connection-line {
+            position: fixed;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(64, 156, 255, 0.5), transparent);
+            pointer-events: none;
+            z-index: -1;
+            transform-origin: left center;
+        }
+
+        /* 背景脉冲效果 - 全页面 */
+        .pulse-effect {
+            position: fixed;
+            border-radius: 50%;
+            border: 2px solid rgba(64, 156, 255, 0.3);
+            pointer-events: none;
+            z-index: -1;
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        /* 背景网格 - 全页面 */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(64, 156, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(64, 156, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* 背景音乐可视化 - 全页面 */
+        .music-visualizer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 3px;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .visualizer-bar {
+            width: 6px;
+            background: linear-gradient(to top, #409cff, #64c1ff);
+            border-radius: 3px 3px 0 0;
+            animation: visualizer 1.5s infinite alternate;
+        }
+
+        @keyframes visualizer {
+            0% { height: 10%; }
+            100% { height: 90%; }
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background-color: rgba(17, 34, 64, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(64, 156, 255, 0.2);
+            position: relative;
+            z-index: 1;
+            margin-top: 40px;
+            margin-bottom: 40px;
+            transition: transform 0.5s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-10px);
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            background: rgba(17, 34, 64, 0.9);
+            border: 1px solid rgba(64, 156, 255, 0.3);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            color: #64c1ff;
+            font-size: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(30deg);
+            background: rgba(30, 60, 114, 0.9);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 导航菜单 */
+        .nav-menu {
+            position: fixed;
+            top: 100px;
+            right: 25px;
+            background: rgba(17, 34, 64, 0.9);
+            border: 1px solid rgba(64, 156, 255, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            z-index: 999;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .nav-menu ul {
+            list-style: none;
+        }
+
+        .nav-menu li {
+            margin: 12px 0;
+        }
+
+        .nav-menu a {
+            color: #a3c8ff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-menu a:hover, .nav-menu a.active {
+            background: rgba(64, 156, 255, 0.2);
+            color: #64c1ff;
+            transform: translateX(-5px);
+        }
+
+        /* 头部样式 */
+        .header {
+            background: linear-gradient(135deg, rgba(17, 34, 64, 0.9), rgba(30, 60, 114, 0.8));
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23409cff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .header h1 {
+            font-size: 3.2rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .header h1::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 5px;
+            bottom: -10px;
+            left: 0;
+            background: linear-gradient(90deg, #409cff, #64c1ff);
+            border-radius: 3px;
+            transform: scaleX(0);
+            transform-origin: bottom right;
+            transition: transform 0.8s ease;
+        }
+
+        .header h1.visible::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
+        .header .title {
+            font-size: 1.6rem;
+            font-weight: 300;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            background: rgba(64, 156, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(64, 156, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .contact-item:hover {
+            transform: translateY(-5px);
+            background: rgba(64, 156, 255, 0.2);
+            box-shadow: 0 10px 20px rgba(64, 156, 255, 0.2);
+        }
+
+        /* 主体内容样式 */
+        .resume-section {
+            padding: 40px;
+            border-bottom: 1px solid rgba(64, 156, 255, 0.1);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .resume-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .resume-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #64c1ff;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            display: inline-block;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(90deg, #409cff, transparent);
+            border-radius: 3px;
+        }
+
+        /* 个人信息样式 */
+        .profile-content {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #c3d7ff;
+        }
+
+        /* 教育和工作经历样式 */
+        .timeline-item {
+            margin-bottom: 40px;
+            position: relative;
+            padding-left: 40px;
+            padding-top: 10px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 15px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #409cff;
+            box-shadow: 0 0 15px rgba(64, 156, 255, 0.7);
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover::before {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(64, 156, 255, 0.9);
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 35px;
+            bottom: -40px;
+            width: 2px;
+            background: linear-gradient(to bottom, #409cff, rgba(64, 156, 255, 0.2));
+        }
+
+        .timeline-item:last-child::after {
+            display: none;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .timeline-title {
+            font-size: 1.4rem;
+            color: #a3c8ff;
+            font-weight: 600;
+        }
+
+        .timeline-period {
+            color: #64c1ff;
+            font-weight: 500;
+            background: rgba(64, 156, 255, 0.15);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(64, 156, 255, 0.3);
+        }
+
+        .timeline-subtitle {
+            font-size: 1.2rem;
+            color: #8ab4ff;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .timeline-description {
+            color: #c3d7ff;
+            line-height: 1.8;
+        }
+
+        /* 技能样式 */
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .skill-category {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .skill-category h4 {
+            font-size: 1.3rem;
+            color: #64c1ff;
+            margin-bottom: 20px;
+            padding-left: 10px;
+            border-left: 4px solid #409cff;
+        }
+
+        .skill-item {
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .skill-name {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .skill-bar {
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .skill-level {
+            height: 100%;
+            background: linear-gradient(90deg, #409cff, #64c1ff);
+            border-radius: 5px;
+            width: 0;
+            position: relative;
+            transition: width 2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        }
+
+        .skill-level::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 项目经验样式 */
+        .project-item {
+            margin-bottom: 30px;
+            padding: 25px;
+            border-radius: 12px;
+            background: linear-gradient(145deg, rgba(17, 34, 64, 0.7), rgba(30, 60, 114, 0.5));
+            border-left: 5px solid #409cff;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .project-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(64, 156, 255, 0.1), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .project-item:hover::before {
+            left: 100%;
+        }
+
+        .project-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .project-title {
+            font-size: 1.3rem;
+            color: #a3c8ff;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .project-tech {
+            font-size: 0.95rem;
+            color: #64c1ff;
+            background: rgba(64, 156, 255, 0.15);
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: 1px solid rgba(64, 156, 255, 0.3);
+        }
+
+        .project-description {
+            color: #c3d7ff;
+            line-height: 1.8;
+        }
+
+        /* 项目标签样式 */
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .project-tag {
+            background: rgba(64, 156, 255, 0.1);
+            color: #8ab4ff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(64, 156, 255, 0.2);
+        }
+
+        /* 项目详情弹窗样式 - 增强版 */
+        .project-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .project-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .project-modal {
+            background: linear-gradient(145deg, rgba(17, 34, 64, 0.95), rgba(30, 60, 114, 0.9));
+            border-radius: 20px;
+            border: 1px solid rgba(64, 156, 255, 0.3);
+            width: 95%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+        }
+
+        .project-modal.active {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .project-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(64, 156, 255, 0.2);
+            border: 1px solid rgba(64, 156, 255, 0.3);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64c1ff;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .project-modal-close:hover {
+            background: rgba(64, 156, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .project-modal-header {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(64, 156, 255, 0.2);
+        }
+
+        .project-modal-title {
+            font-size: 2rem;
+            color: #64c1ff;
+            margin-bottom: 10px;
+        }
+
+        .project-modal-tech {
+            font-size: 1.1rem;
+            color: #8ab4ff;
+            display: inline-block;
+            background: rgba(64, 156, 255, 0.15);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(64, 156, 255, 0.3);
+        }
+
+        /* 项目演示区域样式 */
+        .project-demo-container {
+            margin: 30px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            background: rgba(10, 25, 47, 0.7);
+            border: 1px solid rgba(64, 156, 255, 0.2);
+        }
+
+        .project-demo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(17, 34, 64, 0.8);
+            border-bottom: 1px solid rgba(64, 156, 255, 0.2);
+        }
+
+        .project-demo-title {
+            font-size: 1.2rem;
+            color: #64c1ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .demo-type-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .demo-type-btn {
+            background: rgba(64, 156, 255, 0.1);
+            border: 1px solid rgba(64, 156, 255, 0.3);
+            color: #8ab4ff;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .demo-type-btn.active {
+            background: rgba(64, 156, 255, 0.3);
+            color: #64c1ff;
+        }
+
+        .demo-type-btn:hover:not(.active) {
+            background: rgba(64, 156, 255, 0.2);
+        }
+
+        .project-demo-content {
+            padding: 20px;
+        }
+
+        /* 视频演示样式 */
+        .video-demo {
+            width: 100%;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .demo-video {
+            width: 100%;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-demo:hover .video-controls {
+            opacity: 1;
+        }
+
+        .video-play-btn {
+            background: rgba(64, 156, 255, 0.8);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .video-play-btn:hover {
+            background: rgba(64, 156, 255, 1);
+            transform: scale(1.1);
+        }
+
+        .video-time {
+            color: white;
+            font-size: 0.9rem;
+            margin: 0 15px;
+        }
+
+        .video-progress {
+            flex: 1;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0 15px;
+            cursor: pointer;
+        }
+
+        .video-progress-bar {
+            height: 100%;
+            background: #409cff;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .video-volume {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+
+        .video-fullscreen {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-left: 15px;
+        }
+
+        /* 图片轮播样式 */
+        .image-carousel {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .swiper {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+        }
+
+        .swiper-slide {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .carousel-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .swiper-button-next, .swiper-button-prev {
+            color: #64c1ff;
+            background: rgba(17, 34, 64, 0.7);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            backdrop-filter: blur(5px);
+        }
+
+        .swiper-button-next:after, .swiper-button-prev:after {
+            font-size: 1.5rem;
+        }
+
+        .swiper-pagination-bullet {
+            background: #8ab4ff;
+            opacity: 0.5;
+            width: 10px;
+            height: 10px;
+        }
+
+        .swiper-pagination-bullet-active {
+            background: #64c1ff;
+            opacity: 1;
+        }
+
+        .carousel-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            color: white;
+            padding: 15px;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        /* 项目详情内容样式 */
+        .project-modal-content {
+            line-height: 1.8;
+            color: #c3d7ff;
+        }
+
+        .project-modal-section {
+            margin-bottom: 30px;
+        }
+
+        .project-modal-section h3 {
+            color: #64c1ff;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(64, 156, 255, 0.3);
+        }
+
+        .project-modal-section ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .project-modal-section li {
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .project-modal-section li::before {
+            content: "▸";
+            color: #409cff;
+            position: absolute;
+            left: -15px;
+        }
+
+        .project-modal-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(64, 156, 255, 0.2);
+        }
+
+        .project-modal-tag {
+            background: rgba(64, 156, 255, 0.15);
+            color: #8ab4ff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(64, 156, 255, 0.3);
+        }
+
+        /* 页脚样式 */
+        .footer {
+            padding: 25px 40px;
+            text-align: center;
+            color: #8ab4ff;
+            font-size: 0.95rem;
+            background: rgba(17, 34, 64, 0.7);
+            border-top: 1px solid rgba(64, 156, 255, 0.2);
+        }
+
+        /* 控制按钮 */
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .control-btn {
+            background: rgba(17, 34, 64, 0.9);
+            border: 1px solid rgba(64, 156, 255, 0.3);
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #64c1ff;
+            font-size: 1.3rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-5px);
+            background: rgba(30, 60, 114, 0.9);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 交互提示 */
+        .interaction-hint {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(17, 34, 64, 0.95);
+            border: 1px solid rgba(64, 156, 255, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            color: #8ab4ff;
+            z-index: 10001;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .interaction-hint.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .project-modal {
+                width: 98%;
+                padding: 30px;
+            }
+
+            .swiper {
+                height: 350px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .controls {
+                left: 20px;
+                bottom: 20px;
+            }
+
+            .theme-toggle {
+                top: 20px;
+                right: 20px;
+            }
+
+            .project-modal {
+                width: 95%;
+                padding: 25px;
+            }
+
+            .project-modal-title {
+                font-size: 1.7rem;
+            }
+
+            .music-visualizer {
+                height: 60px;
+            }
+
+            .swiper {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 25px;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .resume-section {
+                padding: 30px 25px;
+            }
+
+            .contact-info {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .timeline-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .controls {
+                flex-direction: column;
+                left: 15px;
+                bottom: 15px;
+            }
+
+            .control-btn {
+                width: 50px;
+                height: 50px;
+            }
+
+            .project-modal {
+                width: 98%;
+                padding: 20px;
+                max-height: 95vh;
+            }
+
+            .project-modal-title {
+                font-size: 1.5rem;
+            }
+
+            .project-demo-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .demo-type-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .demo-type-btn {
+                flex: 1;
+                text-align: center;
+            }
+
+            .music-visualizer {
+                height: 40px;
+            }
+
+            .visualizer-bar {
+                width: 4px;
+            }
+
+            .swiper {
+                height: 250px;
+            }
+
+            .video-controls {
+                padding: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .video-play-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .video-time, .video-volume {
+                font-size: 0.8rem;
+            }
+
+            .video-progress {
+                order: 1;
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+
+        /* 打印样式 */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+
+            .container {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                background: white;
+                color: black;
+            }
+
+            .theme-toggle, .nav-menu, .controls, .floating-element,
+            .interactive-bg, .music-visualizer, .interaction-hint {
+                display: none !important;
+            }
+
+            .contact-item {
+                border: 1px solid #ddd;
+                background: white;
+                color: black;
+            }
+
+            .skill-level {
+                background: #409cff !important;
+            }
+
+            .resume-section {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+
+        /* 键盘导航提示 */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(17, 34, 64, 0.9);
+            border: 1px solid rgba(64, 156, 255, 0.3);
+            border-radius: 10px;
+            padding: 12px 18px;
+            color: #8ab4ff;
+            font-size: 0.9rem;
+            z-index: 1000;
+            display: none;
+        }
+
+        .keyboard-hint.show {
+            display: block;
+            animation: fadeInOut 5s ease;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(10px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(10px); }
+        }
+
+        /* 演示占位符 */
+        .demo-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            background: rgba(17, 34, 64, 0.5);
+            border-radius: 8px;
+            border: 2px dashed rgba(64, 156, 255, 0.3);
+            color: #8ab4ff;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .demo-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #64c1ff;
+        }
+
+        .demo-placeholder h4 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #64c1ff;
+        }
+
+        .demo-placeholder p {
+            font-size: 0.95rem;
+            max-width: 400px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 交互式背景容器 -->
+    <div class="interactive-bg">
+        <!-- 网格背景 -->
+        <div class="grid-bg"></div>
+
+        <!-- 粒子背景 -->
+        <div id="particles-js"></div>
+
+        <!-- 浮动形状 - 分布在整个页面 -->
+        <div class="floating-shape" style="top: 10%; left: 5%; width: 40px; height: 40px; animation-delay: 0s;"></div>
+        <div class="floating-shape square" style="top: 20%; left: 90%; width: 60px; height: 60px; animation-delay: 1s;"></div>
+        <div class="floating-shape triangle" style="top: 50%; left: 5%; animation-delay: 2s;"></div>
+        <div class="floating-shape" style="top: 70%; left: 85%; width: 50px; height: 50px; animation-delay: 3s;"></div>
+        <div class="floating-shape square" style="top: 85%; left: 15%; width: 70px; height: 70px; animation-delay: 4s;"></div>
+        <div class="floating-shape" style="top: 30%; left: 70%; width: 45px; height: 45px; animation-delay: 5s;"></div>
+        <div class="floating-shape triangle" style="top: 60%; left: 30%; animation-delay: 6s;"></div>
+        <div class="floating-shape square" style="top: 15%; left: 40%; width: 55px; height: 55px; animation-delay: 7s;"></div>
+
+        <!-- 背景脉冲效果 -->
+        <div class="pulse-effect" style="top: 20%; left: 20%; width: 100px; height: 100px; animation-delay: 0s;"></div>
+        <div class="pulse-effect" style="top: 70%; left: 60%; width: 150px; height: 150px; animation-delay: 1.5s;"></div>
+        <div class="pulse-effect" style="top: 40%; left: 80%; width: 120px; height: 120px; animation-delay: 3s;"></div>
+
+        <!-- 音乐可视化 -->
+        <div class="music-visualizer" id="musicVisualizer">
+            <!-- 通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <!-- 交互提示 -->
+    <div class="interaction-hint" id="interactionHint">
+        <h3 style="color: #64c1ff; margin-bottom: 15px;">互动提示</h3>
+        <p>试试这些交互效果：</p>
+        <ul style="text-align: left; margin-top: 10px; padding-left: 20px;">
+            <li>点击页面任意位置创建涟漪效果</li>
+            <li>鼠标移动会产生轨迹和连接线</li>
+            <li>点击联系信息会有特殊效果</li>
+            <li>开启背景音乐可以看到可视化效果</li>
+            <li>主题切换按钮可以改变整体配色</li>
+        </ul>
+        <button id="closeHint" style="margin-top: 20px; padding: 10px 25px; background: #409cff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem;">知道了</button>
+    </div>
+
+    <!-- 键盘导航提示 -->
+    <div class="keyboard-hint" id="keyboardHint">
+        提示：按ESC键关闭弹窗，方向键切换项目
+    </div>
+
+    <!-- 主题切换按钮 -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </div>
+
+    <!-- 导航菜单 -->
+    <nav class="nav-menu">
+        <ul>
+            <li><a href="#profile" class="nav-link active"><i class="fas fa-user"></i> 个人简介</a></li>
+            <li><a href="#experience" class="nav-link"><i class="fas fa-briefcase"></i> 校园经历</a></li>
+            <li><a href="#education" class="nav-link"><i class="fas fa-graduation-cap"></i> 教育背景</a></li>
+            <li><a href="#skills" class="nav-link"><i class="fas fa-tools"></i> 专业技能</a></li>
+            <li><a href="#projects" class="nav-link"><i class="fas fa-code"></i> 作品集</a></li>
+
+        </ul>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="container" id="resumeContainer">
+        <!-- 头部信息 -->
+        <header class="header" id="header">
+            <h1 id="mainTitle">刘青鑫</h1>
+            <div class="title">后端开发工程师</div>
+            <div class="contact-info">
+                <div class="contact-item" data-contact-type="phone">
+                    <i class="fas fa-phone"></i>
+                    <span>18208346227</span>
+                </div>
+                <div class="contact-item" data-contact-type="email">
+                    <i class="fas fa-envelope"></i>
+                    <span>1282446081@qq.com</span>
+                </div>
+                <div class="contact-item" data-contact-type="location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>泸州市</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 个人信息 -->
+        <section class="resume-section" id="profile">
+            <h2 class="section-title">个人简介</h2>
+            <div class="profile-content">
+                <p>我是一名即将毕业的计算机科学与技术专业本科生，怀揣着对技术的热爱与探索精神，期待在软件开发和信息技术领域开启我的职业生涯。在校期间，我系统学习了数据结构、算法、操作系统、计算机网络、数据库系统等核心课程，奠定了扎实的理论基础。除了技术能力，我还拥有出色的团队协作和沟通能力，能够快速适应新环境并解决问题。我相信代码不仅是实现功能的工具，更是艺术和创造力的体现。我热衷于探索新技术，并乐于将最佳实践应用于实际项目中。作为一名应届毕业生，我或许缺乏丰富的实战经验，但我拥有强烈的求知欲、扎实的学习功底和全力以赴的工作态度。我渴望加入一个充满活力与创新精神的团队，在实践中不断成长，为公司创造价值的同时，实现个人技术的飞跃与职业理想。</p>
+            </div>
+        </section>
+
+        <!-- 校园经历 -->
+        <section class="resume-section" id="experience">
+            <h2 class="section-title">校园经历</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-header">
+                        <div class="timeline-title">SYB创新创业培训</div>
+                        <div class="timeline-period">2022.10 - 2022.12</div>
+                    </div>
+                    <div class="timeline-subtitle">成都理工大学</div>
+                    <div class="timeline-description">
+                        <p>创新创业培训，对我而言，是一次“思维的重启”与“行动的启蒙”。它让我褪去了不切实际的幻想，掌握了理性探索的工具，更收获了敢于尝试、勤于反思、勇于协作的宝贵品质。种子已经播下，或许它不一定立刻长成参天大树，但它所赋予我的这套思维框架、实践勇气与连接网络，必将持续滋养我未来的学习与成长之路，激励我在任何领域，都努力成为一个积极的“创造者”。</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-header">
+                        <div class="timeline-title">心理委员</div>
+                        <div class="timeline-period">2022.09 - 2024.2</div>
+                    </div>
+                    <div class="timeline-subtitle">成都理工大学</div>
+                    <div class="timeline-description">
+                        <p>心理委员的工作，是一份关于关怀、信任与成长的使命。它让我在实践中学习，在付出中收获。这段经历不仅提升了我服务同学、奉献集体的能力，更让我对人性的复杂与韧性有了更深的理解，对未来生活中如何更好地与人相处、如何面对挑战有了更多的准备与信心。我将继续带着这份收获，在未来的道路上，持续关注心理健康，传递温暖与力量。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 教育背景 -->
+        <section class="resume-section" id="education">
+            <h2 class="section-title">教育背景</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-header">
+                        <div class="timeline-title">成都理工大学</div>
+                        <div class="timeline-period">2022.09 - 2026.06</div>
+                    </div>
+                    <div class="timeline-subtitle">数字媒体技术 · 本科</div>
+                    <div class="timeline-description">
+                        <p>主修课程：数据结构与算法、计算机网络、操作系统、数据库原理、Web前端技术、计算机图形学等。</p>
+                        <p>参加简历制作大赛，参加SYB培训，获得结业证书</p>
+                        <p>担任心理委员，参加心理委员培训，获得了心理委员荣誉证书。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 专业技能 -->
+        <section class="resume-section" id="skills">
+            <h2 class="section-title">专业技能</h2>
+            <div class="skills-container">
+                <div class="skill-category">
+                    <h4>前端技术</h4>
+                    <div class="skill-item" data-level="72">
+                        <div class="skill-name">
+                            <span>HTML5/CSS3</span>
+                            <span>72%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-level"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item" data-level="70">
+                        <div class="skill-name">
+                            <span>JavaScript/TypeScript</span>
+                            <span>70%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-level"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item" data-level="62">
+                        <div class="skill-name">
+                            <span>Vue.js/React</span>
+                            <span>62%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-level"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item" data-level="78">
+                        <div class="skill-name">
+                            <span>UI/QT</span>
+                            <span>78%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-level"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="skill-category">
+                    <h4>开发工具</h4>
+                    <div class="skill-item" data-level="68">
+                        <div class="skill-name">
+                            <span>Unity</span>
+                            <span>68%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-level"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item" data-level="90">
+                        <div class="skill-name">
+                            <span>VS Code/Chrome DevTools</span>
+                            <span>90%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-level"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item" data-level="72">
+                        <div class="skill-name">
+                            <span>UE5</span>
+                            <span>72%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-level"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item" data-level="80">
+                        <div class="skill-name">
+                            <span>AE</span>
+                            <span>80%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-level"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="skill-category">
+                    <h4>其他能力</h4>
+                    <div class="skill-item" data-level="85">
+                        <div class="skill-name">
+                            <span>英语能力 (CET-4)</span>
+                            <span>80%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-level"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item" data-level="90">
+                        <div class="skill-name">
+                            <span>团队协作与沟通</span>
+                            <span>90%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-level"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item" data-level="84">
+                        <div class="skill-name">
+                            <span>问题解决能力</span>
+                            <span>84%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-level"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item" data-level="87">
+                        <div class="skill-name">
+                            <span>项目管理</span>
+                            <span>87%</span>
+                        </div>
+                        <div class="skill-bar">
+                            <div class="skill-level"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 作品集 -->
+                <section class="resume-section" id="projects">
+            <h2 class="section-title">作品集</h2>
+
+            <!-- 项目1 -->
+            <div class="project-item" data-project-id="1">
+                <div class="project-title">
+                    <span>AIGC动画</span>
+                    <span class="project-tech">kimi，通义万象，即梦AI，AE</span>
+                </div>
+                <div class="project-description">
+                    <p>主导了作品的剧本，根据剧本用通用万象生成单个分镜，再用生成的单个分镜在即梦AI中生成视频片段，最终在AE中将视频片段剪辑在一起，导出mp4。</p>
+                    <div class="project-tags">
+                        <span class="project-tag">剧本</span>
+                        <span class="project-tag">AIGC</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 项目2 -->
+            <div class="project-item" data-project-id="2">
+                <div class="project-title">
+                    <span>Unity追逃游戏</span>
+                    <span class="project-tech">Unity</span>
+                </div>
+                <div class="project-description">
+                    <p>负责整个项目的策划到实现，实现了角色的基本移动，攻击，血条以及敌人的AI，场景搭建，道具系统，UI界面等。</p>
+                    <div class="project-tags">
+                        <span class="project-tag">游戏</span>
+                        <span class="project-tag">Unity</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 项目3 -->
+            <div class="project-item" data-project-id="3">
+                <div class="project-title">
+                    <span>3D建模</span>
+                    <span class="project-tech">3D MAX</span>
+                </div>
+                <div class="project-description">
+                    <p>完成一个完整的，可投入项目的坦克建模。</p>
+                    <div class="project-tags">
+                        <span class="project-tag">建模</span>
+                        <span class="project-tag">3D MAX</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 项目4 -->
+            <div class="project-item" data-project-id="4">
+                <div class="project-title">
+                    <span>人脸检测</span>
+                    <span class="project-tech">Django-Python Web，YOLO</span>
+                </div>
+                <div class="project-description">
+                    <p>设计并开发了能使用人脸进行登录注册的网站，采用MVC框架模式。</p>
+                    <div class="project-tags">
+                        <span class="project-tag">人脸检测</span>
+                        <span class="project-tag">Django</span>
+                        <span class="project-tag">MVC</span>
+                        <span class="project-tag">YOLO</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 控制按钮 -->
+    <div class="controls">
+        <div class="control-btn" id="printBtn" title="打印简历">
+            <i class="fas fa-print"></i>
+        </div>
+        <div class="control-btn" id="musicToggle" title="背景音乐">
+            <i class="fas fa-music"></i>
+        </div>
+        <div class="control-btn" id="animationToggle" title="切换动画">
+            <i class="fas fa-play"></i>
+        </div>
+        <div class="control-btn" id="hintToggle" title="交互提示">
+            <i class="fas fa-lightbulb"></i>
+        </div>
+    </div>
+
+    <!-- 项目详情弹窗 -->
+    <div class="project-modal-overlay" id="projectModalOverlay">
+        <div class="project-modal" id="projectModal">
+            <div class="project-modal-close" id="projectModalClose">
+                <i class="fas fa-times"></i>
+            </div>
+            <div class="project-modal-header">
+                <h2 class="project-modal-title" id="projectModalTitle">项目标题</h2>
+                <div class="project-modal-tech" id="projectModalTech">技术栈</div>
+            </div>
+
+            <!-- 项目演示区域 -->
+            <div class="project-demo-container" id="projectDemoContainer">
+                <!-- 演示内容将通过JavaScript动态加载 -->
+            </div>
+
+            <div class="project-modal-content" id="projectModalContent">
+                <!-- 内容通过JavaScript动态加载 -->
+            </div>
+            <div class="project-modal-tags" id="projectModalTags">
+                <!-- 标签通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 背景音乐 -->
+    <audio id="bgMusic" loop>
+        <source src="/media/background-music.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- 引入外部库 -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+
+    <script>
+        // 项目详情数据 - 增强版，包含演示内容
+        const projectDetails = {
+            1: {
+                title: "AIGC",
+                tech: "kimi + 通义万象 + 即梦AI + AE",
+                demo: {
+                    type: "video", // 可以是 "video" 或 "images"
+                    content: {
+                        video: {
+                            url: "/media/video_converted.mp4",
+                            poster: "/media/img.png",
+                        },
+                        images: [
+                            {
+                                url: "/media/img.png",
+                                caption: "作品演示"
+                            }
+                        ]
+                    }
+                },
+                description: `
+                    <div class="project-modal-section">
+                        <h3>作品简介</h3>
+                        <p>《白日梦的幻想》是一部由人工智能驱动的视觉艺术作品。它巧妙地运用AIGC技术捕捉并具象化“白日梦”这一难以言喻的心理状态。算法生成的光影、色彩、形态与构图，突破传统创作的局限，精准地模拟出梦境特有的流动性、荒诞性和超现实感。作品不仅呈现了奇幻的梦境视觉盛宴，更展示了AI作为一种新型艺术媒介，在表达人类深层心理体验和拓展想象力疆域方面的巨大潜力。</p>
+                    </div>
+
+                    <div class="project-modal-section">
+                        <h3>创作步骤</h3>
+                        <ul>
+                            <li>运用AIGC工具生成并优化场景元素</li>
+                            <li>基于角色设定制作动画</li>
+                            <li>协调角色与场景互动</li>
+                            <li>整合动画序列并剪辑合成</li>
+                            <li>添加并处理音频元素</li>
+                        </ul>
+                    </div>
+                `,
+                tags: ["梦", "AIGC", "想象力", "kimi", "通义万象", "即梦AI"]
+            },
+            2: {
+                title: "Unity追逃游戏",
+                tech: "Unity",
+                demo: {
+                    type: "images",
+                    content: {
+                        video: {
+                            url: "/media/mp4_converted.mp4",
+                            poster: "/media/img_1.png",
+                        },
+                        images: [
+                            {
+                                url: "/media/img_1.png",
+                                caption: "Unity游戏界面展示"
+                            }
+                        ]
+                    }
+                },
+                description: `
+                    <div class="project-modal-section">
+                        <h3>作品简介</h3>
+                        <p>基于Unity引擎实现的追逃游戏，系统基于Unity的NavMesh与行为树架构，实现了复杂环境下的智能寻路与动态决策。玩家可以选择逃跑，也可以选择攻击人机。</p>
+                    </div>
+
+                    <div class="project-modal-section">
+                        <h3>创作步骤</h3>
+                        <ul>
+                            <li>核心设计与原型验证</li>
+                            <li>核心系统开发与AI基础构建</li>
+                            <li>场景搭建和碰撞优化</li>
+                            <li>系统整合、优化与打磨</li>
+                        </ul>
+                    </div>
+
+                `,
+                tags: ["游戏", "Unity"]
+            },
+            3: {
+                title: "3D建模",
+                tech: "3D MAX",
+                demo: {
+                    type: "images",
+                    content: {
+                        images: [
+                            {
+                                url: "/media/3c602b50752a986e8f75332279d7a673.jpg",
+                                caption: "模型展示"
+                            }
+                        ]
+                    }
+                },
+                description: `
+                    <div class="project-modal-section">
+                        <h3>作品简介</h3>
+                        <p>基于市面上已有的坦克模型，包括游戏中以及现实中的坦克，进行的建模。</p>
+                    </div>
+
+                    <div class="project-modal-section">
+                        <h3>创作步骤</h3>
+                        <ul>
+                            <li>收集参考资料</li>
+                            <li>搭建基础大型</li>
+                            <li>核心部件建模</li>
+                            <li>制作材质与贴图</li>
+                            <li>场景整合与灯光</li>
+                        </ul>
+                    </div>
+
+                `,
+                tags: ["建模", "坦克", "3D MAX"]
+            },
+            4: {
+                title: "人脸检测系统",
+                tech: "Django + MVC + YOLO算法",
+                demo: {
+                    type: "images",
+                    content: {
+                        images: [
+                            {
+                                url: "/media/5ac7793cfcc0a13ca1735aef04962617.png",
+                                caption: "人脸检测界面展示"
+                            }
+                        ]
+                    }
+                },
+                description: `
+                    <div class="project-modal-section">
+                        <h3>作品简介</h3>
+                        <p>该人脸检测系统基于Django框架开发，集成face_recognition与YOLO模型，实现人脸采集、识别与目标检测一体化功能。系统通过调用摄像头或上传图片，可精准定位人脸并提取特征编码，与数据库中的预存人脸进行比对，快速完成身份验证。同时结合YOLO模型，实现对图片中多类目标的智能检测与标注。系统采用MySQL存储用户信息与人脸特征数据，支持人脸注册、实时识别、信息查询等完整业务流程，适用于安防监控、门禁考勤等多种实际场景，具备较高的实用性与扩展性。</p>
+                    </div>
+
+                    <div class="project-modal-section">
+                        <h3>创作步骤</h3>
+                        <ul>
+                            <li>图像接收与预处理</li>
+                            <li>人脸定位</li>
+                            <li>特征编码提取</li>
+                            <li>人脸库遍历比对</li>
+                            <li>结果判定与返回</li>
+                        </ul>
+                    </div>
+
+                `,
+                tags: ["人脸检测", "MVC", "YOLO"]
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化交互提示
+            const interactionHint = document.getElementById('interactionHint');
+            const closeHintBtn = document.getElementById('closeHint');
+            const hintToggle = document.getElementById('hintToggle');
+
+            // 显示交互提示（首次加载时）
+            setTimeout(() => {
+                interactionHint.classList.add('active');
+            }, 1000);
+
+            // 关闭提示
+            closeHintBtn.addEventListener('click', function() {
+                interactionHint.classList.remove('active');
+            });
+
+            // 提示切换按钮
+            hintToggle.addEventListener('click', function() {
+                interactionHint.classList.toggle('active');
+            });
+
+            // 初始化粒子背景
+            particlesJS('particles-js', {
+                particles: {
+                    number: {
+                        value: 120,
+                        density: {
+                            enable: true,
+                            value_area: 800
+                        }
+                    },
+                    color: { value: "#409cff" },
+                    shape: {
+                        type: "circle",
+                        stroke: {
+                            width: 0,
+                            color: "#64c1ff"
+                        }
+                    },
+                    opacity: {
+                        value: 0.5,
+                        random: true,
+                        anim: {
+                            enable: true,
+                            speed: 1,
+                            opacity_min: 0.1,
+                            sync: false
+                        }
+                    },
+                    size: {
+                        value: 3,
+                        random: true,
+                        anim: {
+                            enable: true,
+                            speed: 2,
+                            size_min: 0.1,
+                            sync: false
+                        }
+                    },
+                    line_linked: {
+                        enable: true,
+                        distance: 150,
+                        color: "#64c1ff",
+                        opacity: 0.2,
+                        width: 1
+                    },
+                    move: {
+                        enable: true,
+                        speed: 2,
+                        direction: "none",
+                        random: true,
+                        straight: false,
+                        out_mode: "out",
+                        bounce: false,
+                        attract: {
+                            enable: true,
+                            rotateX: 600,
+                            rotateY: 1200
+                        }
+                    }
+                },
+                interactivity: {
+                    detect_on: "canvas",
+                    events: {
+                        onhover: {
+                            enable: true,
+                            mode: "grab"
+                        },
+                        onclick: {
+                            enable: true,
+                            mode: "push"
+                        },
+                        resize: true
+                    },
+                    modes: {
+                        grab: {
+                            distance: 140,
+                            line_linked: {
+                                opacity: 0.5
+                            }
+                        },
+                        bubble: {
+                            distance: 400,
+                            size: 40,
+                            duration: 2,
+                            opacity: 8,
+                            speed: 3
+                        },
+                        repulse: {
+                            distance: 200,
+                            duration: 0.4
+                        },
+                        push: {
+                            particles_nb: 4
+                        },
+                        remove: {
+                            particles_nb: 2
+                        }
+                    }
+                },
+                retina_detect: true
+            });
+
+            // 初始化音乐可视化
+            const musicVisualizer = document.getElementById('musicVisualizer');
+            for (let i = 0; i < 40; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'visualizer-bar';
+                bar.style.animationDelay = `${i * 0.05}s`;
+                bar.style.height = `${Math.random() * 80 + 10}%`;
+                musicVisualizer.appendChild(bar);
+            }
+
+            // ========== 全页面鼠标点击效果 ==========
+            let clickEffects = [];
+
+            // 监听整个页面的点击事件
+            document.addEventListener('click', function(e) {
+                // 如果点击的是控制按钮或弹窗关闭按钮，不创建涟漪效果
+                if (e.target.closest('.control-btn') ||
+                    e.target.closest('.project-modal-close') ||
+                    e.target.closest('.theme-toggle') ||
+                    e.target.closest('#closeHint')) {
+                    return;
+                }
+
+                createClickEffect(e.clientX, e.clientY);
+
+                // 限制点击效果数量
+                if (clickEffects.length > 15) {
+                    const oldEffect = clickEffects.shift();
+                    if (oldEffect && document.body.contains(oldEffect)) {
+                        document.body.removeChild(oldEffect);
+                    }
+                }
+            });
+
+            function createClickEffect(x, y) {
+                const effect = document.createElement('div');
+                effect.className = 'click-effect';
+                effect.style.left = `${x}px`;
+                effect.style.top = `${y}px`;
+                effect.style.width = '0px';
+                effect.style.height = '0px';
+
+                document.body.appendChild(effect);
+                clickEffects.push(effect);
+
+                // 动画效果
+                setTimeout(() => {
+                    effect.style.transition = 'all 0.6s ease-out';
+                    effect.style.width = '200px';
+                    effect.style.height = '200px';
+                    effect.style.opacity = '0';
+                }, 10);
+
+                // 移除元素
+                setTimeout(() => {
+                    if (document.body.contains(effect)) {
+                        document.body.removeChild(effect);
+                        clickEffects = clickEffects.filter(e => e !== effect);
+                    }
+                }, 1000);
+            }
+
+            // ========== 全页面鼠标轨迹效果 ==========
+            let mouseTrails = [];
+            let lastMouseX = 0;
+            let lastMouseY = 0;
+            let mouseVelocity = 0;
+
+            document.addEventListener('mousemove', function(e) {
+                // 如果鼠标在控制按钮上，不创建轨迹
+                if (e.target.closest('.control-btn') ||
+                    e.target.closest('.theme-toggle') ||
+                    e.target.closest('.project-modal') ||
+                    e.target.closest('.project-modal-close')) {
+                    return;
+                }
+
+                const trail = document.createElement('div');
+                trail.className = 'mouse-trail';
+                trail.style.left = `${e.clientX}px`;
+                trail.style.top = `${e.clientY}px`;
+
+                // 根据鼠标速度调整轨迹大小
+                const deltaX = e.clientX - lastMouseX;
+                const deltaY = e.clientY - lastMouseY;
+                mouseVelocity = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                const trailSize = Math.min(30, Math.max(5, mouseVelocity / 2));
+
+                trail.style.width = `${trailSize}px`;
+                trail.style.height = `${trailSize}px`;
+
+                document.body.appendChild(trail);
+                mouseTrails.push(trail);
+
+                // 限制轨迹数量
+                if (mouseTrails.length > 25) {
+                    const oldTrail = mouseTrails.shift();
+                    if (oldTrail && document.body.contains(oldTrail)) {
+                        document.body.removeChild(oldTrail);
+                    }
+                }
+
+                // 更新最后位置
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+
+                // 轨迹淡出效果
+                setTimeout(() => {
+                    trail.style.transition = 'opacity 0.5s ease';
+                    trail.style.opacity = '0';
+                }, 50);
+
+                // 移除轨迹
+                setTimeout(() => {
+                    if (document.body.contains(trail)) {
+                        document.body.removeChild(trail);
+                        mouseTrails = mouseTrails.filter(t => t !== trail);
+                    }
+                }, 600);
+
+                // 创建连接线
+                createConnectionLines(e.clientX, e.clientY);
+            });
+
+            // ========== 全页面连接线效果 ==========
+            let connectionLines = [];
+            let lastConnectionTime = 0;
+
+            function createConnectionLines(x, y) {
+                const now = Date.now();
+                if (now - lastConnectionTime < 100) return; // 限制创建频率
+                lastConnectionTime = now;
+
+                // 获取所有浮动形状
+                const shapes = document.querySelectorAll('.floating-shape');
+
+                // 随机选择几个浮动形状进行连接
+                const selectedShapes = [];
+                for (let i = 0; i < Math.min(3, shapes.length); i++) {
+                    const randomIndex = Math.floor(Math.random() * shapes.length);
+                    selectedShapes.push(shapes[randomIndex]);
+                }
+
+                selectedShapes.forEach(shape => {
+                    const rect = shape.getBoundingClientRect();
+                    const shapeX = rect.left + rect.width / 2;
+                    const shapeY = rect.top + rect.height / 2;
+
+                    // 计算距离
+                    const distance = Math.sqrt(Math.pow(x - shapeX, 2) + Math.pow(y - shapeY, 2));
+                    if (distance > 500) return; // 只连接较近的形状
+
+                    const line = document.createElement('div');
+                    line.className = 'connection-line';
+                    line.style.left = `${x}px`;
+                    line.style.top = `${y}px`;
+                    line.style.width = `${distance}px`;
+
+                    // 计算角度
+                    const angle = Math.atan2(shapeY - y, shapeX - x) * 180 / Math.PI;
+                    line.style.transform = `rotate(${angle}deg)`;
+
+                    document.body.appendChild(line);
+                    connectionLines.push(line);
+
+                    // 限制连接线数量
+                    if (connectionLines.length > 8) {
+                        const oldLine = connectionLines.shift();
+                        if (oldLine && document.body.contains(oldLine)) {
+                            document.body.removeChild(oldLine);
+                        }
+                    }
+
+                    // 移除连接线
+                    setTimeout(() => {
+                        line.style.transition = 'opacity 0.5s ease';
+                        line.style.opacity = '0';
+                    }, 100);
+
+                    setTimeout(() => {
+                        if (document.body.contains(line)) {
+                            document.body.removeChild(line);
+                            connectionLines = connectionLines.filter(l => l !== line);
+                        }
+                    }, 1000);
+                });
+            }
+
+            // 项目详情弹窗功能
+            const projectModalOverlay = document.getElementById('projectModalOverlay');
+            const projectModal = document.getElementById('projectModal');
+            const projectModalClose = document.getElementById('projectModalClose');
+            const projectModalTitle = document.getElementById('projectModalTitle');
+            const projectModalTech = document.getElementById('projectModalTech');
+            const projectModalContent = document.getElementById('projectModalContent');
+            const projectModalTags = document.getElementById('projectModalTags');
+            const projectDemoContainer = document.getElementById('projectDemoContainer');
+            const projectItems = document.querySelectorAll('.project-item');
+
+            let currentProjectId = 1;
+            let totalProjects = projectItems.length;
+            let isModalOpen = false;
+            let currentDemoType = 'video'; // 默认显示视频演示
+            let videoPlayer = null;
+            let imageSwiper = null;
+
+            // 打开项目详情弹窗
+            function openProjectModal(projectId) {
+                currentProjectId = projectId;
+                const project = projectDetails[projectId];
+
+                if (!project) return;
+
+                isModalOpen = true;
+
+                // 设置弹窗内容
+                projectModalTitle.textContent = project.title;
+                projectModalTech.textContent = project.tech;
+                projectModalContent.innerHTML = project.description;
+
+                // 清空并添加标签
+                projectModalTags.innerHTML = '';
+                project.tags.forEach(tag => {
+                    const tagElement = document.createElement('span');
+                    tagElement.className = 'project-modal-tag';
+                    tagElement.textContent = tag;
+                    projectModalTags.appendChild(tagElement);
+                });
+
+                // 创建演示内容
+                createDemoContent(project);
+
+                // 显示弹窗
+                projectModalOverlay.classList.add('active');
+                setTimeout(() => {
+                    projectModal.classList.add('active');
+                }, 10);
+
+                // 显示键盘导航提示
+                showKeyboardHint();
+
+                // 阻止背景滚动
+                document.body.style.overflow = 'hidden';
+            }
+
+            // 创建演示内容
+            function createDemoContent(project) {
+                // 清空演示容器
+                projectDemoContainer.innerHTML = '';
+
+                if (!project.demo) {
+                    // 如果没有演示内容，显示占位符
+                    projectDemoContainer.innerHTML = `
+                        <div class="demo-placeholder">
+                            <i class="fas fa-photo-video"></i>
+                            <h4>暂无演示内容</h4>
+                            <p>此项目暂无视频或图片演示内容。演示区域可以展示项目界面截图、功能演示视频或产品操作录屏。</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // 创建演示头部
+                const demoHeader = document.createElement('div');
+                demoHeader.className = 'project-demo-header';
+                demoHeader.innerHTML = `
+                    <div class="project-demo-title">
+                        <i class="fas fa-photo-video"></i>
+                        <span>项目演示</span>
+                    </div>
+                    <div class="demo-type-buttons">
+                        <button class="demo-type-btn ${project.demo.type === 'video' ? 'active' : ''}" data-demo-type="video">
+                            <i class="fas fa-video"></i> 视频演示
+                        </button>
+                        <button class="demo-type-btn ${project.demo.type === 'images' ? 'active' : ''}" data-demo-type="images">
+                            <i class="fas fa-images"></i> 图片展示
+                        </button>
+                    </div>
+                `;
+
+                // 创建演示内容区域
+                const demoContent = document.createElement('div');
+                demoContent.className = 'project-demo-content';
+
+                // 根据项目演示类型设置当前演示类型
+                currentDemoType = project.demo.type;
+
+                // 添加演示内容
+                if (project.demo.type === 'video' && project.demo.content.video) {
+                    demoContent.innerHTML = createVideoDemo(project.demo.content.video);
+                } else if (project.demo.type === 'images' && project.demo.content.images) {
+                    demoContent.innerHTML = createImageDemo(project.demo.content.images);
+                } else {
+                    demoContent.innerHTML = `
+                        <div class="demo-placeholder">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h4>演示内容暂不可用</h4>
+                            <p>此项目无视频演示</p>
+                        </div>
+                    `;
+                }
+
+                // 将头部和内容添加到容器
+                projectDemoContainer.appendChild(demoHeader);
+                projectDemoContainer.appendChild(demoContent);
+
+                // 添加演示类型切换事件
+                const demoTypeButtons = demoHeader.querySelectorAll('.demo-type-btn');
+                demoTypeButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const type = this.getAttribute('data-demo-type');
+                        if (type === currentDemoType) return;
+
+                        // 更新按钮状态
+                        demoTypeButtons.forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
+
+                        // 更新演示内容
+                        currentDemoType = type;
+                        updateDemoContent(type, project);
+                    });
+                });
+
+                // 初始化视频播放器或图片轮播
+                if (project.demo.type === 'video') {
+                    setTimeout(() => {
+                        initVideoPlayer();
+                    }, 100);
+                } else if (project.demo.type === 'images') {
+                    setTimeout(() => {
+                        initImageCarousel();
+                    }, 100);
+                }
+            }
+
+            // 更新演示内容
+            function updateDemoContent(type, project) {
+                const demoContent = projectDemoContainer.querySelector('.project-demo-content');
+
+                if (!demoContent) return;
+
+                // 清除之前的视频或轮播
+                if (videoPlayer) {
+                    videoPlayer.pause();
+                    videoPlayer = null;
+                }
+
+                if (imageSwiper) {
+                    imageSwiper.destroy();
+                    imageSwiper = null;
+                }
+
+                // 更新内容
+                if (type === 'video' && project.demo.content.video) {
+                    demoContent.innerHTML = createVideoDemo(project.demo.content.video);
+                    setTimeout(() => {
+                        initVideoPlayer();
+                    }, 100);
+                } else if (type === 'images' && project.demo.content.images) {
+                    demoContent.innerHTML = createImageDemo(project.demo.content.images);
+                    setTimeout(() => {
+                        initImageCarousel();
+                    }, 100);
+                } else {
+                    demoContent.innerHTML = `
+                        <div class="demo-placeholder">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h4>演示内容暂不可用</h4>
+                            <p>该作品没有视频演示</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // 创建视频演示HTML
+            function createVideoDemo(videoData) {
+                return `
+                    <div class="video-demo">
+                        <video class="demo-video" poster="${videoData.poster}" preload="metadata">
+                            <source src="${videoData.url}" type="video/mp4">
+                            您的浏览器不支持视频播放
+                        </video>
+                        <div class="video-controls">
+                            <button class="video-play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <div class="video-time">
+                                <span class="current-time">0:00</span> / <span class="duration">0:00</span>
+                            </div>
+                            <div class="video-progress">
+                                <div class="video-progress-bar"></div>
+                            </div>
+                            <div class="video-volume">
+                                <i class="fas fa-volume-up"></i>
+                                <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1">
+                            </div>
+                            <button class="video-fullscreen">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 创建图片演示HTML
+            function createImageDemo(images) {
+                let slidesHTML = '';
+                images.forEach((image, index) => {
+                    slidesHTML += `
+                        <div class="swiper-slide">
+                            <img src="${image.url}" alt="项目截图 ${index + 1}" class="carousel-image">
+                            <div class="carousel-caption">${image.caption}</div>
+                        </div>
+                    `;
+                });
+
+                return `
+                    <div class="image-carousel">
+                        <div class="swiper">
+                            <div class="swiper-wrapper">
+                                ${slidesHTML}
+                            </div>
+                            <div class="swiper-button-next"></div>
+                            <div class="swiper-button-prev"></div>
+                            <div class="swiper-pagination"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 初始化视频播放器
+            function initVideoPlayer() {
+                const video = document.querySelector('.demo-video');
+                const playBtn = document.querySelector('.video-play-btn');
+                const currentTimeEl = document.querySelector('.current-time');
+                const durationEl = document.querySelector('.duration');
+                const progressBar = document.querySelector('.video-progress-bar');
+                const progressContainer = document.querySelector('.video-progress');
+                const volumeSlider = document.querySelector('.volume-slider');
+                const fullscreenBtn = document.querySelector('.video-fullscreen');
+
+                if (!video) return;
+
+                videoPlayer = video;
+
+                // 设置视频时长
+                video.addEventListener('loadedmetadata', function() {
+                    const duration = formatTime(video.duration);
+                    durationEl.textContent = duration;
+                });
+
+                // 更新当前时间
+                video.addEventListener('timeupdate', function() {
+                    const currentTime = formatTime(video.currentTime);
+                    const duration = formatTime(video.duration);
+                    const progressPercent = (video.currentTime / video.duration) * 100;
+
+                    currentTimeEl.textContent = currentTime;
+                    durationEl.textContent = duration;
+                    progressBar.style.width = `${progressPercent}%`;
+                });
+
+                // 播放/暂停按钮
+                playBtn.addEventListener('click', function() {
+                    if (video.paused) {
+                        video.play();
+                        playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    } else {
+                        video.pause();
+                        playBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    }
+                });
+
+                // 视频播放状态变化
+                video.addEventListener('play', function() {
+                    playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                });
+
+                video.addEventListener('pause', function() {
+                    playBtn.innerHTML = '<i class="fas fa-play"></i>';
+                });
+
+                // 点击进度条跳转
+                progressContainer.addEventListener('click', function(e) {
+                    const width = this.clientWidth;
+                    const clickX = e.offsetX;
+                    const duration = video.duration;
+
+                    video.currentTime = (clickX / width) * duration;
+                });
+
+                // 音量控制
+                volumeSlider.addEventListener('input', function() {
+                    video.volume = this.value;
+                });
+
+                // 全屏功能
+                fullscreenBtn.addEventListener('click', function() {
+                    const videoContainer = document.querySelector('.video-demo');
+
+                    if (!document.fullscreenElement) {
+                        if (videoContainer.requestFullscreen) {
+                            videoContainer.requestFullscreen();
+                        } else if (videoContainer.webkitRequestFullscreen) {
+                            videoContainer.webkitRequestFullscreen();
+                        } else if (videoContainer.msRequestFullscreen) {
+                            videoContainer.msRequestFullscreen();
+                        }
+                    } else {
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                        } else if (document.webkitExitFullscreen) {
+                            document.webkitExitFullscreen();
+                        } else if (document.msExitFullscreen) {
+                            document.msExitFullscreen();
+                        }
+                    }
+                });
+
+                // 退出全屏时更新按钮
+                document.addEventListener('fullscreenchange', function() {
+                    if (!document.fullscreenElement) {
+                        // 退出全屏
+                    }
+                });
+            }
+
+            // 初始化图片轮播
+            function initImageCarousel() {
+                imageSwiper = new Swiper('.swiper', {
+                    direction: 'horizontal',
+                    loop: true,
+                    speed: 500,
+                    autoplay: {
+                        delay: 5000,
+                        disableOnInteraction: false,
+                    },
+                    pagination: {
+                        el: '.swiper-pagination',
+                        clickable: true,
+                    },
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    },
+                });
+            }
+
+            // 格式化时间（秒 -> MM:SS）
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+
+            // 关闭项目详情弹窗
+            function closeProjectModal() {
+                // 清除视频播放器
+                if (videoPlayer) {
+                    videoPlayer.pause();
+                    videoPlayer = null;
+                }
+
+                // 清除图片轮播
+                if (imageSwiper) {
+                    imageSwiper.destroy();
+                    imageSwiper = null;
+                }
+
+                projectModal.classList.remove('active');
+                setTimeout(() => {
+                    projectModalOverlay.classList.remove('active');
+                    // 恢复背景滚动
+                    document.body.style.overflow = '';
+                    isModalOpen = false;
+                }, 300);
+            }
+
+            // 切换到下一个项目
+            function nextProject() {
+                currentProjectId = currentProjectId >= totalProjects ? 1 : currentProjectId + 1;
+                openProjectModal(currentProjectId);
+            }
+
+            // 切换到上一个项目
+            function prevProject() {
+                currentProjectId = currentProjectId <= 1 ? totalProjects : currentProjectId - 1;
+                openProjectModal(currentProjectId);
+            }
+
+            // 显示键盘导航提示
+            function showKeyboardHint() {
+                const keyboardHint = document.getElementById('keyboardHint');
+                keyboardHint.classList.add('show');
+                setTimeout(() => {
+                    keyboardHint.classList.remove('show');
+                }, 5000);
+            }
+
+            // 项目卡片点击事件
+            projectItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const projectId = parseInt(this.getAttribute('data-project-id'));
+                    openProjectModal(projectId);
+                });
+            });
+
+            // 关闭按钮点击事件
+            projectModalClose.addEventListener('click', closeProjectModal);
+
+            // 点击遮罩层关闭弹窗
+            projectModalOverlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeProjectModal();
+                }
+            });
+
+            // 键盘事件监听
+            document.addEventListener('keydown', function(e) {
+                // ESC键关闭弹窗
+                if (e.key === 'Escape' && isModalOpen) {
+                    closeProjectModal();
+                }
+
+                // 左箭头切换到上一个项目
+                if (e.key === 'ArrowLeft' && isModalOpen) {
+                    prevProject();
+                }
+
+                // 右箭头切换到下一个项目
+                if (e.key === 'ArrowRight' && isModalOpen) {
+                    nextProject();
+                }
+            });
+
+            // 其他交互功能保持不变...
+            // (这里省略了之前已经实现的交互功能代码，如主题切换、联系信息交互等)
+            // 在实际完整代码中，这些功能应该保留
+
+            // 标题动画效果
+            const mainTitle = document.getElementById('mainTitle');
+            setTimeout(() => {
+                mainTitle.classList.add('visible');
+            }, 500);
+
+            // 初始化显示第一个section
+            document.querySelector('.resume-section').classList.add('visible');
+        });
+        // 滚动动画 - 在视图中显示各个部分
+function initScrollAnimation() {
+    const sections = document.querySelectorAll('.resume-section');
+
+    function checkScroll() {
+        const triggerBottom = window.innerHeight * 0.8;
+
+        sections.forEach(section => {
+            const sectionTop = section.getBoundingClientRect().top;
+
+            if (sectionTop < triggerBottom) {
+                section.classList.add('visible');
+            }
+        });
+    }
+
+    // 初始检查
+    checkScroll();
+
+    // 滚动时检查
+    window.addEventListener('scroll', checkScroll);
+}
+
+// 初始化技能条动画
+function initSkillBars() {
+    const skillItems = document.querySelectorAll('.skill-item');
+
+    function animateSkillBars() {
+        skillItems.forEach(item => {
+            const skillBar = item.querySelector('.skill-level');
+            const level = item.getAttribute('data-level');
+
+            // 确保元素在视图中
+            const rect = item.getBoundingClientRect();
+            const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+
+            if (isVisible && !item.classList.contains('animated')) {
+                setTimeout(() => {
+                    skillBar.style.width = `${level}%`;
+                    item.classList.add('animated');
+                }, 200);
+            }
+        });
+    }
+
+    // 初始检查
+    animateSkillBars();
+
+    // 滚动时检查
+    window.addEventListener('scroll', animateSkillBars);
+}
+
+// 导航菜单点击滚动
+function initNavigation() {
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // 移除所有active类
+            navLinks.forEach(l => l.classList.remove('active'));
+            // 给当前点击的添加active类
+            this.classList.add('active');
+
+            // 滚动到对应部分
+            const targetId = this.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+
+            if (targetSection) {
+                window.scrollTo({
+                    top: targetSection.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
+    // 滚动时更新导航高亮
+    function updateNavOnScroll() {
+        const sections = document.querySelectorAll('.resume-section');
+        const scrollPos = window.scrollY + 100;
+
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            const sectionId = section.getAttribute('id');
+
+            if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${sectionId}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }
+
+    window.addEventListener('scroll', updateNavOnScroll);
+}
+
+// 联系信息交互
+function initContactInteractions() {
+    const contactItems = document.querySelectorAll('.contact-item');
+
+    contactItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const type = this.getAttribute('data-contact-type');
+            let message = '';
+
+            switch(type) {
+                case 'phone':
+                    message = '电话号码已复制到剪贴板: 138-XXXX-XXXX';
+                    // 模拟复制到剪贴板
+                    navigator.clipboard.writeText('138-XXXX-XXXX').catch(err => {
+                        console.log('复制失败: ', err);
+                    });
+                    break;
+                case 'email':
+                    message = '邮箱地址已复制到剪贴板: wangxiaoming@example.com';
+                    navigator.clipboard.writeText('wangxiaoming@example.com').catch(err => {
+                        console.log('复制失败: ', err);
+                    });
+                    break;
+                case 'location':
+                    message = '位置: 北京市海淀区';
+                    break;
+                case 'github':
+                    message = '正在打开GitHub页面...';
+                    window.open('https://github.com/wangxiaoming', '_blank');
+                    break;
+            }
+
+            // 创建通知
+            createNotification(message);
+        });
+    });
+}
+
+// 创建通知
+function createNotification(message) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 30px;
+        background: rgba(17, 34, 64, 0.95);
+        color: #64c1ff;
+        padding: 15px 25px;
+        border-radius: 10px;
+        border: 1px solid rgba(64, 156, 255, 0.3);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+
+    notification.innerHTML = `
+        <i class="fas fa-check-circle" style="margin-right: 10px;"></i>
+        <span>${message}</span>
+    `;
+
+    document.body.appendChild(notification);
+
+    // 3秒后移除
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// 添加动画样式
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+// 控制按钮功能
+function initControlButtons() {
+    // 打印功能
+    document.getElementById('printBtn').addEventListener('click', function() {
+        window.print();
+    });
+
+    // 音乐控制
+    const musicToggle = document.getElementById('musicToggle');
+    const bgMusic = document.getElementById('bgMusic');
+    let isMusicPlaying = false;
+
+    musicToggle.addEventListener('click', function() {
+        if (isMusicPlaying) {
+            bgMusic.pause();
+            musicToggle.innerHTML = '<i class="fas fa-music"></i>';
+            musicToggle.style.color = '#64c1ff';
+        } else {
+            bgMusic.play().catch(e => {
+                console.log('自动播放被阻止，需要用户交互:', e);
+                // 如果自动播放被阻止，显示提示
+                createNotification('点击页面任意位置后，再点击音乐按钮');
+            });
+            musicToggle.innerHTML = '<i class="fas fa-volume-up"></i>';
+            musicToggle.style.color = '#409cff';
+        }
+        isMusicPlaying = !isMusicPlaying;
+    });
+
+    // 动画切换
+    const animationToggle = document.getElementById('animationToggle');
+    let animationsEnabled = true;
+
+    animationToggle.addEventListener('click', function() {
+        animationsEnabled = !animationsEnabled;
+
+        if (animationsEnabled) {
+            this.innerHTML = '<i class="fas fa-play"></i>';
+            this.title = '关闭动画';
+            document.body.style.overflow = '';
+            // 重新启用所有动画
+            document.querySelectorAll('*').forEach(el => {
+                el.style.animationPlayState = 'running';
+            });
+        } else {
+            this.innerHTML = '<i class="fas fa-pause"></i>';
+            this.title = '开启动画';
+            // 暂停所有动画
+            document.querySelectorAll('*').forEach(el => {
+                el.style.animationPlayState = 'paused';
+            });
+        }
+    });
+
+}
+
+// 主题切换功能
+function initThemeToggle() {
+    const themeToggle = document.getElementById('themeToggle');
+    let isDarkMode = true;
+
+    themeToggle.addEventListener('click', function() {
+        isDarkMode = !isDarkMode;
+
+        if (isDarkMode) {
+            // 切换到深色主题
+            document.body.style.background = 'linear-gradient(-45deg, #0a192f, #0c2b4b, #112d4e, #1a3a5f)';
+            themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            themeToggle.style.color = '#64c1ff';
+            createNotification('已切换至深色主题');
+        } else {
+            // 切换到浅色主题
+            document.body.style.background = 'linear-gradient(-45deg, #f0f7ff, #e6f0ff, #d9e8ff, #cce0ff)';
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            themeToggle.style.color = '#ffb74d';
+            createNotification('已切换至浅色主题');
+        }
+    });
+}
+
+// 在DOM加载完成后初始化所有功能
+document.addEventListener('DOMContentLoaded', function() {
+    // 原有代码...
+
+    // 在原有代码的最后添加这些初始化调用
+    setTimeout(() => {
+        initScrollAnimation();
+        initSkillBars();
+        initNavigation();
+        initContactInteractions();
+        initControlButtons();
+        initThemeToggle();
+
+        // 确保所有部分都能看到
+        const sections = document.querySelectorAll('.resume-section');
+        sections.forEach((section, index) => {
+            setTimeout(() => {
+                section.classList.add('visible');
+            }, index * 200);
+        });
+
+        // 初始化技能条
+        const skillItems = document.querySelectorAll('.skill-item');
+        skillItems.forEach((item, index) => {
+            setTimeout(() => {
+                const skillBar = item.querySelector('.skill-level');
+                const level = item.getAttribute('data-level');
+                skillBar.style.width = `${level}%`;
+            }, 1000 + index * 100);
+        });
+
+    }, 1000);
+});
+    </script>
+</body>
+</html>
